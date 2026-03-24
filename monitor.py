@@ -20,12 +20,16 @@ class SystemMonitor:
     def _collect(self):
         """采集数据的具体逻辑"""
         while self.is_running:
-            cpu = psutil.cpu_percent(interval=1)
+            # 修改点：使用 interval=None 获取非阻塞的即时数据
+            # 否则 interval=1 会导致测试跑完了还没采集到第一条数据
+            cpu = psutil.cpu_percent(interval=None)
             memory = psutil.virtual_memory().percent
             # 记录数据
             self.metrics.append({"cpu": cpu, "memory": memory})
             # 可选：打印到控制台实时观察
             print(f"[Monitor] CPU: {cpu}% | Memory: {memory}%")
+            # 手动控制采集频率，每 0.5 秒采集一次（防止占用 CPU）
+            time.sleep(0.5)
 
     def stop(self):
         """停止监控并返回数据"""
