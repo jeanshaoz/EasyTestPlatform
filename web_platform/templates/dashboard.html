@@ -1,0 +1,49 @@
+	<!DOCTYPE html>
+	<html lang="zh-CN">
+	<head>
+	    <meta charset="UTF-8">
+	    <title>EasyTest 测试运维平台</title>
+	    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	    <style>
+	        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+	        button { padding: 10px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+	        button:disabled { background-color: #ccc; }
+	        #result { margin-top: 20px; background: #f4f4f4; padding: 15px; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
+	        h1 { color: #333; }
+	    </style>
+	</head>
+	<body>
+	    <h1>🚀 自动化测试控制台</h1>
+	    <p>点击下方按钮，一键触发后端 Pytest 测试套件。</p>
+	    <button onclick="runTests()" id="btn">执行测试</button>
+	    <div id="result">等待执行...</div>
+	    <script>
+	        function runTests() {
+	            const btn = document.getElementById('btn');
+	            const resultDiv = document.getElementById('result');
+	            btn.disabled = true;
+	            btn.innerText = "测试执行中...";
+	            resultDiv.innerText = "正在发送指令到服务器...\n";
+	            axios.post('/api/run_tests')
+	                .then(res => {
+	                    const data = res.data;
+	                    if (data.return_code === 0) {
+	                        resultDiv.innerText = "✅ 测试执行成功！\n\n" + data.output;
+	                        resultDiv.style.color = "green";
+	                    } else {
+	                        resultDiv.innerText = "❌ 测试执行失败！\n\n" + data.output + "\n" + data.error;
+	                        resultDiv.style.color = "red";
+	                    }
+	                })
+	                .catch(err => {
+	                    resultDiv.innerText = "系统错误: " + err;
+	                    resultDiv.style.color = "red";
+	                })
+	                .finally(() => {
+	                    btn.disabled = false;
+	                    btn.innerText = "执行测试";
+	                });
+	        }
+	    </script>
+	</body>
+	</html>
